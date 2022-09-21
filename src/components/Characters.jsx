@@ -1,9 +1,13 @@
-import React, { useState, useEffect, useReducer, useMemo, useRef } from "react";
+import React, { useState, useReducer, useMemo, useRef, useCallback } from "react";
 import "../styles/Characters.css";
+import Search from "./Search";
+import useCharacters from "../hooks/useCharacters";
 
 const initialState = {
   favorites: [],
 };
+
+const API = 'https://rickandmortyapi.com/api/character/';
 
 const favoriteReducer = (state, action) => {
   switch (action.type) {
@@ -18,24 +22,30 @@ const favoriteReducer = (state, action) => {
 };
 
 const Characters = () => {
-  const [characters, setCharacters] = useState([]);
+  // const [characters, setCharacters] = useState([]);
   const [favorites, dispatch] = useReducer(favoriteReducer, initialState);
   const [search, setSearch] = useState('');
   const searchInput = useRef(null);
 
-  useEffect(() => {
-    fetch("https://rickandmortyapi.com/api/character/")
-      .then((response) => response.json())
-      .then((data) => setCharacters(data.results));
-  }, []);
+  const characters = useCharacters(API);
+
+  // useEffect(() => {
+  //   fetch("https://rickandmortyapi.com/api/character/")
+  //     .then((response) => response.json())
+  //     .then((data) => setCharacters(data.results));
+  // }, []);
 
   const handleClick = favorite => {
     dispatch({ type: "ADD_TO_FAVORITE", payload: favorite });
   };
 
-  const handleSearch = () => {
+  // const handleSearch = () => {
+  //   setSearch(searchInput.current.value);
+  // }
+
+  const handleSearch = useCallback(() => {
     setSearch(searchInput.current.value);
-  }
+  }, []) 
 
   // const filteredUsers = characters.filter((user) => {
   //   return user.name.toLowerCase().includes(search.toLowerCase());
@@ -51,9 +61,9 @@ const Characters = () => {
   return (
     <div className="characters">
         <h3>MIS FAVORITOS</h3>
-        <div className="search">
-        <input type="text" value={search} ref={searchInput} onChange={handleSearch} />
-        </div>
+        
+        <Search search={search} searchInput={searchInput} handleSearch={handleSearch} />
+      
       {favorites.favorites.map((favorite) => (
         <li key={favorite.id}>{favorite.name}</li>
       ))}
